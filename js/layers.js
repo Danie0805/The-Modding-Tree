@@ -5,6 +5,7 @@ addLayer("b", {
     startData() { return {
         unlocked: true,
 		points: new Decimal(0),
+        
     }},
     color: "#4BDC13",
     requires: new Decimal(8), // Can be a function that takes requirement increases into account
@@ -13,16 +14,47 @@ addLayer("b", {
     baseAmount() {return player.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 0.5, // Prestige currency exponent
-    gainMult() { // Calculate the multiplier for main currency from bonuses
-        mult = new Decimal(1)
+    gainMult() {
+        let mult = new Decimal(1)
+        if (hasUpgrade('b', 13)) mult = mult.times(upgradeEffect('b', 13))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         return new Decimal(1)
     },
+    upgrades: {
+        11:{
+            name: "存储！",
+            description: "加快位数的获取！",
+            cost: new Decimal(1),
+            
+        },
+        12:{
+            name: "存储！存储！",
+            description: "以一个基于字节数的增益加快位数的获取！",
+            cost: new Decimal(8),
+            effect() {
+                return player[this.layer].points.add(1).pow(0.5)
+            },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+        
+        },
+        13:{
+            name: "优化！",
+            description: "优化字节的获取！",
+            cost: new Decimal(4),
+            effect() {
+                return player.points.add(1).pow(0.15)
+            },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+            
+        },
+    },
     row: 0, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "B", description: "B: Reset for Bytes", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "B", description: "B: 重置字节", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
+    
     layerShown(){return true}
+    
 })
